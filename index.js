@@ -2,10 +2,7 @@ const fs = require("fs");
 const puppeteer = require("puppeteer");
 
 const names = require("./names.json");
-
-const MS_TIME = {
-    ONE_SECOND: 1000,
-};
+const { MS_TIME } = require("./constants.js");
 
 const getYouTubeUrl = async (page, name) => {
     await page.goto("https://youtube.com");
@@ -17,7 +14,7 @@ const getYouTubeUrl = async (page, name) => {
         page.waitForNavigation({ waitUntil: "load" }),
         page.click("button#search-icon-legacy")
     ]);
-    await page.waitForSelector("ytd-channel-renderer")
+    await page.waitForSelector("ytd-channel-renderer");
     const $channels = [...await page.$$("ytd-channel-renderer")];
     const $as = (await Promise.all($channels.map($c => $c.$$("a#main-link")))).flat();
     const urls = await Promise.all($as.map($a => $a.evaluate($a => $a.href)));
@@ -31,7 +28,7 @@ const writeResult = result => new Promise((resolve, reject) =>
         return resolve();
     }));
 
-(async () => {
+const main = async () => {
     const browser = await puppeteer.launch({
         headless: false,
         defaultViewport: null,
@@ -64,4 +61,6 @@ const writeResult = result => new Promise((resolve, reject) =>
         });
 
     await browser.close();
-})();
+};
+
+main();
